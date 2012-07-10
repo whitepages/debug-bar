@@ -4,10 +4,10 @@ require 'wp-debug-bar/version'
 
 Gem::Specification.new do |s|
   s.name        = 'wp-debug-bar'
-  s.version     = Wp::Relay::VERSION
+  s.version     = DebugBar::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ['Keith Stone']
-  s.email       = ['kstone@whitepages.com']
+  s.authors     = ['Jeff Reinecke', 'Keith Stone']
+  s.email       = ['jreinecke@whitepages.com', 'kstone@whitepages.com']
   s.homepage    = ''
   s.summary     = 'Whitepages Debug Bar'
   s.description = 'Whitepages standard debug bar'
