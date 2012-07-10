@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.summary     = 'Whitepages Debug Bar'
   s.description = 'Whitepages standard debug bar'
 
-  s.add_dependency 'awesome-print'
+  s.add_dependency 'awesome_print'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec}/*`.split("\n")
