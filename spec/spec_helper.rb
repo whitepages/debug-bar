@@ -1,7 +1,7 @@
 require 'rspec'
 require 'vcr'
 
-require 'wp-relay'
+require 'wp-debug-bar'
 
 WP::Config::set_config_root(File.expand_path(File.join(File.dirname(__FILE__),'data')))
 
