@@ -1,0 +1,12 @@
+<div class="callback-box dbar-togglable" style="border:1px solid gray; margin:4px; padding:4px;">
+<% if opts[:id] %>
+  <a href="" id="<%= opts[:id] %>"  class='dbar-toggle persistent'>
+<% else %>
+  <a href="" class='dbar-toggle'>
+<% end %>
+    [x] <span class="title" style="font-weight:bold; color: #000000;"><%= title %></span>
+  </a>
+  <div class="dbar-content <%= 'show' unless opts[:hidden] %>">
+    <%= content %>
+  </div>
+</div>

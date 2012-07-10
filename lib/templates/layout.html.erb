@@ -1,0 +1,112 @@
+<div id="debug-bar" style="text-align:left; border:1px solid yellow; background:#ffffaa; width:24px; position:fixed; top:0; left:0; z-index:999">
+  <a href="" id="debug-toggle">[x]</a>
+  <div id="debug-data" style="font-size:9pt; display:none; overflow:auto;">
+    <%= content %>
+  </div>
+</div>
+
+<script>
+  /*!
+   * jQuery Cookie Plugin
+   * https://github.com/carhartl/jquery-cookie
+   *
+   * Copyright 2011, Klaus Hartl
+   * Dual licensed under the MIT or GPL Version 2 licenses.
+   * http://www.opensource.org/licenses/mit-license.php
+   * http://www.opensource.org/licenses/GPL-2.0
+   */
+  (function($) {
+      $.cookie = function(key, value, options) {
+
+          // key and at least value given, set cookie...
+          if (arguments.length > 1 && (!/Object/.test(Object.prototype.toString.call(value)) || value === null || value === undefined)) {
+              options = $.extend({}, options);
+
+              if (value === null || value === undefined) {
+                  options.expires = -1;
+              }
+
+              if (typeof options.expires === 'number') {
+                  var days = options.expires, t = options.expires = new Date();
+                  t.setDate(t.getDate() + days);
+              }
+
+              value = String(value);
+
+              return (document.cookie = [
+                  encodeURIComponent(key), '=', options.raw ? value : encodeURIComponent(value),
+                  options.expires ? '; expires=' + options.expires.toUTCString() : '', // use expires attribute, max-age is not supported by IE
+                  options.path    ? '; path=' + options.path : '',
+                  options.domain  ? '; domain=' + options.domain : '',
+                  options.secure  ? '; secure' : ''
+              ].join(''));
+          }
+
+          // key and possibly options given, get cookie...
+          options = value || {};
+          var decode = options.raw ? function(s) { return s; } : decodeURIComponent;
+
+          var pairs = document.cookie.split('; ');
+          for (var i = 0, pair; pair = pairs[i] && pairs[i].split('='); i++) {
+              if (decode(pair[0]) === key) return decode(pair[1] || ''); // IE saves cookies with empty string as "c; ", e.g. without "=" as opposed to EOMB, thus pair[1] may be undefined
+          }
+          return null;
+      };
+  })(jQuery);
+</script>
+<script>
+  jQuery('document').ready(function(){
+    var toggleDebugBar = function(){
+      var data = jQuery('#debug-data').toggle();
+      jQuery('#debug-bar').css('width',  data.is(':visible') ? 'auto' : '24px');
+      jQuery('#debug-bar').css('max-height', data.is(':visible') ? '100%' : '24px');
+      jQuery('#debug-bar').css('overflow-y', data.is(':visible') ? 'auto' : 'hidden');
+    };
+
+    jQuery('#debug-toggle').on('click', function(e){
+      toggleDebugBar();
+      return false;
+    });
+
+    jQuery('body').bind('keydown', function(e){
+      if(e.keyCode == 192 && e.ctrlKey == true)
+        toggleDebugBar();
+    });
+    
+    jQuery('.dbar-toggle').bind('click', function(){
+      var toggle = jQuery(this); 
+      var content = toggle.closest('.dbar-togglable').find('.dbar-content');
+      content.first().toggle(); 
+      return false;
+    });
+    
+    jQuery('.callback-box .dbar-toggle.persistent').bind('click', function() {
+      // caching
+      var toggle = jQuery(this);
+      var id = toggle.attr('id');
+      
+      // Deal with an empty cookie and split the commas
+      var debug_bar_array = jQuery.cookie('debug_bar') ? jQuery.cookie('debug_bar').split(',') : [];
+      
+      // Just a double check it has an id
+      if (id)
+      {
+        // Decide which way to toggle this key
+        var id_index = debug_bar_array.indexOf(id);
+        if (id_index > -1)
+        {
+          // Remove id from cookie 
+          debug_bar_array.splice(id_index, 1);
+        }
+        else
+        {
+          // Add the id into the list to keep open
+          debug_bar_array.push(id);
+        }
+        
+        // Rejoin the cookie keys and store
+        jQuery.cookie('debug_bar', debug_bar_array.join(','), { path: '/', expires: 7 });
+      } 
+    });
+  });
+</script>
