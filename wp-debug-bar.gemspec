@@ -1,18 +1,18 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path('../lib', __FILE__)
-require 'wp-relay/version'
+require 'wp-debug-bar/version'
 
 Gem::Specification.new do |s|
-  s.name        = 'wp-relay'
+  s.name        = 'wp-debug-bar'
   s.version     = Wp::Relay::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = ['Keith Stone']
   s.email       = ['kstone@whitepages.com']
   s.homepage    = ''
-  s.summary     = 'Whitepages Relays'
-  s.description = 'Whitepages Interfaces for sending things out to users'
+  s.summary     = 'Whitepages Debug Bar'
+  s.description = 'Whitepages standard debug bar'
 
-  s.add_dependency 'wp-remote-client'
+  s.add_dependency 'awesome-print'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec}/*`.split("\n")
