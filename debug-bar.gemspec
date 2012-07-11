@@ -11,6 +11,7 @@ Gem::Specification.new do |s|
   s.homepage    = ''
   s.summary     = 'Debug Bar'
   s.description = 'Base generic debug bar implementation.'
+  s.licenses    = ['BSD']
 
   s.add_dependency 'erubis'
   s.add_dependency 'activesupport'

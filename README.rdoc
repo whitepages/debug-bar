@@ -1,0 +1,126 @@
+= Overview
+
+DebugBar offers an easy way to show developer/debugging information on a a web
+page in an unobtrustive way.  It features keyboard shortcuts for showing/hiding
+the bar (Ctrl-~), and memory (through cookies) of which information to show.
+
+DebugBar uses a modular architecture utilizing callback lambdas to produce
+the contents of the DebugBar.
+
+DebugBar::Base is the base debug bar, suitable for use in any application, and
+comes without any pre-added callbacks.
+
+DebugBar::Default is a default debug bar suitible for a typical Rails application,
+and includes several default callbacks meaningful in such an environment.
+
+= Installation
+
+To use DebugBar, your application must include jQuery in rendered pages.
+
+Typically, Rails applications create a debug_bar initializer that defines a
+DEBUG_BAR constant which refers to the configured DebugBar instance.  Customization
+and setup are typically done in this file.
+
+= Examples
+
+== Basic Usage
+
+Typically the debug bar is added to your layout template with the following code
+  DebugBar::Default.new.render(binding)
+though it is typically better to pre-instantiate your debug bar instance as a
+constant in an initializer, and then reference it in your layout.
+
+Additionally, it is common to include code that controls the optional rendering
+of the debug bar based on environement and/or parameters; for example
+  DebugBar::Default.new.render(binding) if Rails.env=='development' || params.include?(:debugger)
+could be used in Rails.
+
+== Custom Callbacks
+
+While there are a basic set of callbacks available, the real power of DebugBar
+is the ability to add custom callbacks.
+
+In the context of a Rails application, custom callbacks are typically added
+to the config/initializer where the debug_bar is instantiated.
+
+=== Basic
+
+Custom callbacks are typically Proc objects that take an evaluation binding
+context as an argument, and produce an array of the form of two to three elements:
+
+[title] The display title for this callback box.
+[body] The raw HTML string to render.
+[opts] A hash of options to pass to the renderer, usually used to control box layout options.  This is optional.
+
+Thus, if one wanted a debug box to display the time, one might do
+  debug_bar.add {|binding| ['Time', Time.now.to_s]
+
+A more complex example would to output the params hash.  Note that since the output
+is raw HTML, we must replace all instances of '<' with '&lt;'.  (A proper implementation
+would escape all escapable entities.)
+  debug_bar.add do |binding|
+    body = binding.eval('params').inspect.gsub('<','&lt;')
+    ['Params', body]
+  end
+
+Note that we using binding.eval to extract variable names from the bidning by
+executing snippets of code.  Any code can be evaluated in the binding in this
+manor, thus choice of render binding has a major impact on the information
+available for display.
+
+
+=== Rails Render
+
+If rendering the DebugBar from within a Rails template (e.g. the application
+layout), you can use Rails render commands to generate
+
+=== Options
+
+== Custom Recipes
+
+=== Setup
+
+=== Templates
+
+= Contact
+
+= Feature Roadmap
+
+* Binding extensions on the bindings passed to the block:
+  [get] Returns the local variable passed to it as a sym or string.  Aliased to :[]
+
+* Recipe classes get registered against a debug_bar, and are searched from last
+  added to first added for a recipe.  Additionally, recipe classes get a
+  convenience method for rendering templates from a template directory.
+
+= Version History
+
+[1.0.0 - 2012-Jul-13] Initial Release.
+
+= License
+
+  Copyright (c) 2012, WhitePages, Inc.
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+      * Redistributions of source code must retain the above copyright
+        notice, this list of conditions and the following disclaimer.
+      * Redistributions in binary form must reproduce the above copyright
+        notice, this list of conditions and the following disclaimer in the
+        documentation and/or other materials provided with the distribution.
+      * Neither the name of the company nor the
+        names of its contributors may be used to endorse or promote products
+        derived from this software without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL WHITEPAGES, INC. BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
