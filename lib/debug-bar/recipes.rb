@@ -1,4 +1,5 @@
 require 'pp'
+require 'awesome_print'
 
 module DebugBar
   class Recipes

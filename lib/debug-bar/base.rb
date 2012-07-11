@@ -1,6 +1,8 @@
 require 'pathname'
 require 'erubis'
 require 'awesome_print'
+require 'active_support/all'
+
 
 require_relative 'recipes'
 

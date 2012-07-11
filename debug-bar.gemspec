@@ -9,9 +9,11 @@ Gem::Specification.new do |s|
   s.authors     = ['Jeff Reinecke', 'Keith Stone']
   s.email       = ['jreinecke@whitepages.com', 'kstone@whitepages.com']
   s.homepage    = ''
-  s.summary     = 'Whitepages Debug Bar'
-  s.description = 'Whitepages standard debug bar'
+  s.summary     = 'Debug Bar'
+  s.description = 'Base generic debug bar implementation.'
 
+  s.add_dependency 'erubis'
+  s.add_dependency 'activesupport'
   s.add_dependency 'awesome_print'
 
   s.files         = `git ls-files`.split("\n")
