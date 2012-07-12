@@ -182,33 +182,70 @@ describe DebugBar::Base do
 
   describe 'recipe books' do
 
+    class TestBook < DebugBar::RecipeBook::Base
+      def duplicated_recipe
+        Proc.new {|b| :test_book_duplicated_recipe}
+      end
+
+      def beta_recipe
+        Proc.new {|b| :test_book_beta_recipe}
+      end
+
+      def some_helper
+      end
+    end
+
+    class AnotherTestBook < DebugBar::RecipeBook::Base
+      def duplicated_recipe
+        Proc.new {|b| :another_test_book_duplicated_recipe}
+      end
+
+      def gamma_recipe
+        Proc.new {|b| :another_test_book_gamma_recipe}
+      end
+    end
+
     before(:each) do
-      @debug_bar = DebugBar::Base.new
-      @book_class = DebugBar::RecipeBook::Default
+      @book_class = TestBook # TODO: This is a poor choice, we should create one just for testing.
       @book = @book_class.new
+
+      @base_debug_bar = DebugBar::Base.new
+      @debug_bar = DebugBar::Base.new {|bar| bar.add_recipe_book(TestBook); bar.add_recipe_book(AnotherTestBook)}
     end
 
     it 'should add recipe books by class' do
-      @debug_bar.add_recipe_book(@book_class)
+      @base_debug_bar.add_recipe_book(@book_class)
 
-      @debug_bar.recipe_books.length.should == 1
-      @debug_bar.recipe_books.first.should be_kind_of(@book_class)
+      @base_debug_bar.recipe_books.length.should == 1
+      @base_debug_bar.recipe_books.first.should be_kind_of(@book_class)
     end
 
     it 'should add recipe books by instance' do
-      @debug_bar.add_recipe_book(@book)
+      @base_debug_bar.add_recipe_book(@book)
 
-      @debug_bar.recipe_books.length.should == 1
-      @debug_bar.recipe_books.first.should be_kind_of(@book_class)
+      @base_debug_bar.recipe_books.length.should == 1
+      @base_debug_bar.recipe_books.first.should be_kind_of(@book_class)
     end
 
-    it 'should return the list of known recipes'
+    it 'should return the list of known recipes' do
+      @debug_bar.recipes.sort.should == [:beta, :duplicated, :gamma].sort
+    end
 
-    it 'should return a recipe callback if one is found'
+    it 'should return a recipe callback if one is found' do
+      callback = @debug_bar.recipe_callback(:beta)
+      callback.should be_kind_of(Proc)
+      callback.call.should == :test_book_beta_recipe
+    end
 
-    it 'should raise an Argument Error if a recipe is not found'
+    it 'should raise an Argument Error if a recipe is not found' do
+      lambda {@debug_bar.recipe_callback(:zeta)}.should raise_error(ArgumentError)
+    end
 
-    it 'should use the last found instance of a recipe when it is duplicated'
+    it 'should use the last found instance of a recipe when it is duplicated' do
+      callback = @debug_bar.recipe_callback(:duplicated)
+      callback.should be_kind_of(Proc)
+      callback.call.should == :another_test_book_duplicated_recipe
+    end
 
   end
 

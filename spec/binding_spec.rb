@@ -15,14 +15,14 @@ end
 
 describe DebugBar::Ext::Binding do
 
-  describe '[]' do
+  describe '[] method' do
 
     before(:all) do
       @binding = TestContext.new.get_binding
       @binding.extend(DebugBar::Ext::Binding)
     end
 
-    it 'should respond to []' do
+    it 'should exist on binding' do
       @binding.should respond_to(:[])
     end
 
