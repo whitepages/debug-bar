@@ -66,10 +66,10 @@ module DebugBar
     end
 
     # Returns the most recently added occurance of the given recipe.
-    def recipe_callback(recipe)
+    def recipe_callback(recipe, *args)
       book = @recipe_books.reverse.find {|book| book.include?(recipe)}
       raise ArgumentError, "Could not find recipe #{recipe.inspect}", caller if book.nil?
-      return book[recipe]
+      return book.recipe(recipe, *args)
     end
 
     # Adds a callback.
@@ -79,9 +79,13 @@ module DebugBar
     # The block takes a single argument, the binding of the render context,
     # and should return either a string, or an array of [title, content, opts].
     #
+    # Advanced users can call a recipe by name, and provide additional arguments
+    # to configure the recipe further.  These arguments are defined by the
+    # recipe factory method, but usually are via an options hash.
+    #
     # Returns self to support functional programming styles.
-    def add_callback(recipe=nil, &callback)
-      callback_proc = (callback || recipe_callback(recipe))
+    def add_callback(recipe=nil, *args, &callback)
+      callback_proc = (callback || recipe_callback(recipe, *args))
       raise ArgumentError, "Expected callback to respond to `call': #{callback_proc.inspect}", caller unless callback_proc.respond_to?(:call)
       @callbacks << callback_proc
       return self
@@ -122,10 +126,12 @@ module DebugBar
     end
 
     # Looks for the given remplate name within the template search paths, and
-    # returns a string containing its contents.
+    # returns a string containing its contents.  The name may be a symbol or string.
     #
     # Template names automatically have '.html.erb' appended to them, so call
-    # <code>read_template('foo')</code> instead of <code>read_template('foo.html.erb').
+    #   read_template(:foo)
+    # instead of
+    #   read_template('foo.html.erb')
     def read_template(template)
       template_name = "#{template}.html.erb"
       template_path = template_search_paths.map {|base_path| (base_path + template_name).expand_path}.find {|p| p.exist? && p.file?}

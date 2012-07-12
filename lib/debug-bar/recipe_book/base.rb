@@ -5,21 +5,41 @@ module DebugBar
   # gem.  For the base RecipeBook, see RecipeBook::Base.
   module RecipeBook
     # The base class for all recipe subclasses.  Provides common convenience
-    # methods for recipe use.
+    # methods for recipe use.  Essentially, these are factory methods that
+    # lazy generate common configurable callbacks on demand.
     #
-    # Subclasses should define factory instance methods that take no arguments
-    # and return callbacks as Procs; This is so that DebugBars can be
-    # instantiated with recipe names as callbacks.
+    # Subclasses need only to define factory instance methods that meet the
+    # following rules:
+    # 1. The method name must be the recipe name suffixed with `_recipe'.  So
+    #    the recipe
+    #      :foo
+    #    would have method name
+    #      foo_recipe
+    # 2. Recipe factory methods <b>MUST</b> return a valid callback when no arguments
+    #    are given, that is
+    #      book.foo_recipe()
+    #    must work.
+    # 3. The result of a recipe factory method must be a Proc object that
+    #    conforms to the requirements of the Procs registered with +add_callback+
+    #    on the DebugBar::Base class.
+    # 4. Recipe methods <i>may</i> take an additional argument, which is an
+    #    options hash for special configuration when using +add_callback+ on
+    #    DebugBar::Base instances.  For example, one can then us
     #
-    # Doing it this way also allows for on-demand, lazy instantiation
-    # of the callback Procs.
+    # For example, the following recipe renders the params hash from the given
+    # binding:
     #
-    # Advanced purposes can have optional arguments to the factory methods for
-    # customization; these are then explicitly added to the DebugBar.  For example:
-    #   debug.add( &SomeRecipeClass.params_recipe(:formatter => :pretty) )
+    #   def params_recipe(opts={})
+    #     Proc.new do |b|
+    #       body = (opts[:formatter] == :pretty_inspect) ? b[:params].pretty_inspect : b[:params].inspect
+    #       ['Params', body.gsub('<','&lt;'), :hidden => (body.length>160)]
+    #     end
+    #   end
     #
-    # Recipe method names must be suffixed with '_recipe' for introspection and
-    # namespacing purposes.
+    # It could then be added to the DebugBar like so:
+    #
+    #   debug_bar.add(:params)
+    #   debug_bar.add(:params, :formatter => :pretty_inspect)
     class Base
 
       # Retrieves the template search paths for this recipe instance as
@@ -44,15 +64,20 @@ module DebugBar
       end
       alias_method :has_recipe?, :include?
 
-      # Gets the given recipe.
-      def [](recipe)
-        return self.send("#{recipe}_recipe")
+      # Generates the given recipe.
+      # All recipes are expected to accept no arguments, but may optionally
+      # take more.  Optional arguments given to this method are passed through
+      # to the recipe method.
+      def recipe(recipe, *args)
+        return self.send("#{recipe}_recipe", *args)
       end
+      alias_method :[], :recipe
 
       private
 
       # Renders the first matching template found in the search paths.  Passed
-      # symbols/names are automatically suffixed with 'html.erb'.
+      # symbols/names are automatically suffixed with 'html.erb'.  The template
+      # name may be a symbol or string.
       #
       # Optionally, one can pass in :locals, which is a hash of local variables
       # to render in the template.
@@ -61,6 +86,7 @@ module DebugBar
       end
 
       # Reads the given template and returns the string of its contents.
+      # The template name may be either a symbol or string.
       def read_template(template)
         template_name = "#{template}.html.erb"
         template_path = self.template_search_paths.map {|base_path| (base_path + template_name).expand_path}.find {|p| p.exist? && p.file?}

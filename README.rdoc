@@ -28,11 +28,19 @@ and setup are typically done in this file.
 Typically the debug bar is added to your layout template with the following code
   DebugBar::Default.new.render(binding)
 though it is typically better to pre-instantiate your debug bar instance as a
-constant in an initializer, and then reference it in your layout.
+constant in an initializer, and then reference it in your layout, like so:
+
+  # In your initializer
+  DEBUG_BAR = DebugBar::Default.new do |debug_bar|
+    # Do additional setup, such as registering custom recipe books and callbacks here.
+  end
+
+  # In your layout view template
+  DEBUG_BAR.render(binding)
 
 Additionally, it is common to include code that controls the optional rendering
 of the debug bar based on environement and/or parameters; for example
-  DebugBar::Default.new.render(binding) if Rails.env=='development' || params.include?(:debugger)
+  DEBUG_BAR.render(binding) if Rails.env=='development' || params.include?(:debugger)
 could be used in Rails.
 
 == Custom Callbacks
@@ -72,32 +80,66 @@ executing snippets of code.  This raises two points:
   thus
     body = binding[:params].inspect
   could be substituted for
-    body = binding.eval('params')
+    body = binding.eval('params').inspect
 
 
 === Rails Render
 
 If rendering the DebugBar from within a Rails template (e.g. the application
-layout), you can use Rails render commands to generate
+layout), you can use Rails render commands in the callback via a binding.eval
+to render any template and output the results to the debug bar.  This is
+convenient way to render any input, though the use of custom recipe books
+should be considered if you do this often.
 
 === Options
 
+Callbacks may provide the following options:
+
+[:id] The HTML id for the callback for use with custom javascript hooks, and remembered settings.
+[:hidden] Controls default state of disclosure arrow for the callback's content.
+          Note that if an :id is provided, the state can be remembered between requests.
+
 == Custom Recipes
+
+While it is convenient to define one-off callbacks directly via add, it is
+often both cleaner and more useful to create re-usable callback recipes in
+RecipeBooks.  Additionally, RecipeBooks provide some convenience methods not
+available in your own initializers.
+
+Essentially, subclasses of RecipeBook::Base are factory classes that contain
+instance methods that generate Proc objects that are used as callbacks.  What
+makes RecipeBook special over any random factory class is the convenience
+methods it gives and the tight integration with DebugBar::Base instances.
 
 === Setup
 
-=== Templates
+One can manually add a RecipeBook by class or instance using the +add_recipe_book+
+method.  For example
+  debug_bar.add_recipe_book(DebugBar::RecipeBook::Default)
+or
+  book = DebugBar::RecipeBook::Default.new
+  debug_bar.add_recipe_book(book)
+
+=== Creating Your Own
+
+To create your own recipe book, simply subclass another recipe book and add
+recipe generation inatance methods that follow a few simple rules:
+1. They must be the recipe name suffixed with `_recipe'.
+2. They must be able to support being called with no elements to support
+   short-hand addition of a recipe.  (This does no preclude supporting optional
+   arguments and manual addition of the generated block.
+
+Recipes in a RecipeBook::Base subclass get access to special functionality, such
+as being able to use templates at class-defined locations.
 
 = Contact
 
+Jeff Reinecke <jreinecke@whitepages.com>
+Keith Stone <kstone@whitepages.com>
+
 = Feature Roadmap
 
-* Binding extensions on the bindings passed to the block:
-  [get] Returns the local variable passed to it as a sym or string.  Aliased to :[]
-
-* Recipe classes get registered against a debug_bar, and are searched from last
-  added to first added for a recipe.  Additionally, recipe classes get a
-  convenience method for rendering templates from a template directory.
+* No future features expected at this time.
 
 = Version History
 

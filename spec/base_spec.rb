@@ -97,6 +97,23 @@ describe DebugBar::Base do
 
       html.index('Amelia').should_not be_nil
       html.index(':given_name').should_not be_nil
+      html.index('dbar-content show').should_not be_nil # See if params was expanded.
+    end
+
+    it 'should render recipes with args' do
+      @debug_bar.add_recipe_book(DebugBar::RecipeBook::Default)
+      @debug_bar.add(:params, :cutoff => 12)
+
+      params = {:given_name => 'Amelia', :family_name => 'Pond'}
+
+      html = @debug_bar.render(binding)
+
+      html.should be_kind_of(String)
+      html.should_not be_empty
+
+      html.index('Amelia').should_not be_nil
+      html.index(':given_name').should_not be_nil
+      html.index('dbar-content show').should be_nil # See if params was collapsed due to cutoff.
     end
 
     it 'should render the callback_box' do
@@ -165,9 +182,25 @@ describe DebugBar::Base do
 
   describe 'recipe books' do
 
-    it 'should add recipe books by class'
+    before(:each) do
+      @debug_bar = DebugBar::Base.new
+      @book_class = DebugBar::RecipeBook::Default
+      @book = @book_class.new
+    end
 
-    it 'should add recipe books by instance'
+    it 'should add recipe books by class' do
+      @debug_bar.add_recipe_book(@book_class)
+
+      @debug_bar.recipe_books.length.should == 1
+      @debug_bar.recipe_books.first.should be_kind_of(@book_class)
+    end
+
+    it 'should add recipe books by instance' do
+      @debug_bar.add_recipe_book(@book)
+
+      @debug_bar.recipe_books.length.should == 1
+      @debug_bar.recipe_books.first.should be_kind_of(@book_class)
+    end
 
     it 'should return the list of known recipes'
 
