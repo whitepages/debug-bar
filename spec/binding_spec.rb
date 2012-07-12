@@ -1,17 +1,24 @@
 require 'spec_helper'
 
+class TestContext
+  TARDIS = :tardis
+  @@gallifrey = :gallifrey
+  $the_doctor = :the_doctor
+
+  def get_binding
+    amelia_pond = :amelia_pond
+    @river_song = :river_song
+
+    return binding
+  end
+end
+
 describe DebugBar::Ext::Binding do
 
   describe '[]' do
 
-    before(:each) do
-      amelia_pond = :amelia_pond
-      @river_song = :river_song
-      $the_doctor = :the_doctor
-      TARDIS = :tardis
-      @@gallifrey = :gallifrey
-
-      @binding = binding
+    before(:all) do
+      @binding = TestContext.new.get_binding
       @binding.extend(DebugBar::Ext::Binding)
     end
 

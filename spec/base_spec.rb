@@ -82,8 +82,6 @@ describe DebugBar::Base do
       binding.should_not respond_to(:[])
       html = @debug_bar.render(binding)
 
-      puts html.inspect
-
       html.index("||get is true||").should_not be_nil
     end
 
