@@ -65,11 +65,11 @@ would escape all escapable entities.)
 
 Note that we using binding.eval to extract variable names from the binding by
 executing snippets of code.  This raises two points:
- * Any code can be evaluated in the binding in this
-   manor, thus choice of render binding has a major impact on the information
-   available for display.
- * As a convenience, variables can be extracted from the binding with the +:[]+ method,
-   thus <code>body = binding[:params].inspect</code> could be substituted for <code>body = binding.eval('params')</code>.
+* Any code can be evaluated in the binding in this
+  manor, thus choice of render binding has a major impact on the information
+  available for display.
+* As a convenience, variables can be extracted from the binding with the +:[]+ method,
+  thus <code>body = binding[:params].inspect</code> could be substituted for <code>body = binding.eval('params')</code>.
 
 
 === Rails Render
