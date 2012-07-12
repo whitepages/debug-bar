@@ -70,6 +70,17 @@ describe DebugBar::Base do
       html.index(foobar).should_not be_nil
     end
 
+    it 'should render with a custom decorated binding' do
+      @debug_bar.add {|b| ["Binding", "||get is #{b.respond_to?(:[])}||", {}]}
+
+      binding.should_not respond_to(:[])
+      html = @debug_bar.render(binding)
+
+      puts html.inspect
+
+      html.index("||get is true||").should_not be_nil
+    end
+
     it 'should render recipes' do
       @debug_bar.add(:params)
       params = {:given_name => 'Amelia', :family_name => 'Pond'}

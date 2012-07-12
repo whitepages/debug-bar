@@ -53,7 +53,7 @@ context as an argument, and produce an array of the form of two to three element
 [opts] A hash of options to pass to the renderer, usually used to control box layout options.  This is optional.
 
 Thus, if one wanted a debug box to display the time, one might do
-  debug_bar.add {|binding| ['Time', Time.now.to_s]
+  debug_bar.add {|binding| ['Time', Time.now.to_s]}
 
 A more complex example would to output the params hash.  Note that since the output
 is raw HTML, we must replace all instances of '<' with '&lt;'.  (A proper implementation
@@ -63,10 +63,13 @@ would escape all escapable entities.)
     ['Params', body]
   end
 
-Note that we using binding.eval to extract variable names from the bidning by
-executing snippets of code.  Any code can be evaluated in the binding in this
-manor, thus choice of render binding has a major impact on the information
-available for display.
+Note that we using binding.eval to extract variable names from the binding by
+executing snippets of code.  This raises two points:
+ * Any code can be evaluated in the binding in this
+   manor, thus choice of render binding has a major impact on the information
+   available for display.
+ * As a convenience, variables can be extracted from the binding with the +:[]+ method,
+   thus <code>body = binding[:params].inspect</code> could be substituted for <code>body = binding.eval('params')</code>.
 
 
 === Rails Render

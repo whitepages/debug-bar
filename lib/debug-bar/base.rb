@@ -1,10 +1,9 @@
+require 'active_support/all'
 require 'pathname'
 require 'erubis'
-require 'awesome_print'
-require 'active_support/all'
 
 
-require_relative 'recipes'
+require_relative 'ext'
 
 module DebugBar
   # The base debug bar class.
@@ -43,6 +42,8 @@ module DebugBar
 
     # Renders the debug bar with the given binding.
     def render(eval_binding)
+      # Decorate the binding here (NOT in private methods where we don't want automatic behavior)!
+      eval_binding.extend(DebugBar::Ext::Binding)
       return render_layout(eval_binding)
     end
 
