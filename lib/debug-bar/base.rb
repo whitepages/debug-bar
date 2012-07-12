@@ -5,15 +5,33 @@ require 'erubis'
 
 require_relative 'ext'
 
+# DebugBar is the module namespace for this gem.  For the DebugBar base class,
+# see DebugBar::Base.
 module DebugBar
-  # The base debug bar class.
+  # = Overview
   #
-  # DebugBar is generally rendered within a context by being given a render
-  # binding.  For example <code>debug_bar.render(binding)</code>.
+  # DebugBar::Base provides the base methods for all debug bars.
+  #
+  # At it's core, a DebugBar is instantiated with +initialize+, gets callbacks
+  # added with +add_callback+, and then is rendered with +render+.
+  #
+  # Additionally, RecipeBook classes or instance may be added to the DebugBar
+  # via +add_recipe_book+ so that pre-made callbacks may be easily added to the
+  # DebugBar instance via add_callbacks.
+  #
+  # See the README for example usage.
+  #
+  # = Subclassing
+  #
+  # This class is often subclassed to give DebugBars with special behaviors.
+  # If you make a subclass, define <b>private</b> overrides to these methods:
+  # [+default_recipe_books+] Provide a list of recipe books to make available to all instances.
+  # [+default_recipes+] Add a list of recipe callbacks to all instances.
+  # [+template_search_paths+] Override the default formatting template search path.
   class Base
 
-    # The search path for base templates, such as the layout and callback box.
-    # NOTE: This is separate from templates that might be used in recipes.
+    # The search path for formatting templates, such as the layout and callback box.
+    # NOTE: This is separate from templates that are used in recipes!
     TEMPLATE_SEARCH_PATHS = [
       (Pathname.new(__FILE__).dirname + '../templates')
     ].map {|path| path.expand_path}
@@ -22,23 +40,53 @@ module DebugBar
     # one or more recipe symbols as arguments.
     def initialize(*recipes)
       @callbacks = []
-      recipes.each {|recipe| add(recipe)}
+      @recipe_books = default_recipe_books()
       yield self if block_given?
+      (recipes|default_recipes()).each {|recipe| add(recipe)}
     end
 
+    # Returns a copy of the raw list of callbacks.
     attr_reader :callbacks
-    attr_writer :callbacks
+
+    # Returns a copy of the list of recipe book instances.
+    attr_reader :recipe_books
+
+    # Adds a recipe book class or instance to the recipe book list for
+    # this debug bar.
+    #
+    # Returns self to support functional programming styles.
+    def add_recipe_book(book)
+      @recipe_books << (book.kind_of?(Class) ? book.new : book)
+      return self
+    end
+
+    # Returns the list of recipes recognized by this debug bar.
+    def recipes
+      return @recipe_books.inject([]) {|list,book| list | book.recipes}
+    end
+
+    # Returns the most recently added occurance of the given recipe.
+    def recipe_callback(recipe)
+      book = @recipe_books.reverse.find {|book| book.include?(recipe)}
+      raise ArgumentError, "Could not find recipe #{recipe.inspect}", caller if book.nil?
+      return book[recipe]
+    end
 
     # Adds a callback.
     #
-    # Takes either a recipe symbol, or a block.
+    # Takes either a recipe (by symbol) or a block.
     #
     # The block takes a single argument, the binding of the render context,
-    # and should return an array of [title, content, opts].
-    def add(recipe=nil, &callback)
-      @callbacks << (callback || Recipes.new.send(recipe.to_sym))
+    # and should return either a string, or an array of [title, content, opts].
+    #
+    # Returns self to support functional programming styles.
+    def add_callback(recipe=nil, &callback)
+      callback_proc = (callback || recipe_callback(recipe))
+      raise ArgumentError, "Expected callback to respond to `call': #{callback_proc.inspect}", caller unless callback_proc.respond_to?(:call)
+      @callbacks << callback_proc
       return self
     end
+    alias_method :add, :add_callback
 
     # Renders the debug bar with the given binding.
     def render(eval_binding)
@@ -49,14 +97,39 @@ module DebugBar
 
     private
 
-    # Looks for the given remplate name within the template search paths.
+    # An initialization callback for adding default recipe books to instances;
+    # this should return an array of recipe book classes or instances.
+    #
+    # On the base class, this returns an empty array; subclasses should override this.
+    def default_recipe_books
+      return []
+    end
+
+    # An initialization callback for adding default recipes to the callbacks
+    # array.
+    #
+    # On the base class, this returns an empty array; subclasses should override this.
+    def default_recipes
+      return []
+    end
+
+    # Returns the template search paths for this instance.
+    #
+    # Subclasses may override this to change the search path for the formatting
+    # templates such as the layout and callback_box templates.
+    def template_search_paths
+      return TEMPLATE_SEARCH_PATHS
+    end
+
+    # Looks for the given remplate name within the template search paths, and
+    # returns a string containing its contents.
     #
     # Template names automatically have '.html.erb' appended to them, so call
     # <code>read_template('foo')</code> instead of <code>read_template('foo.html.erb').
     def read_template(template)
-      #puts  TEMPLATE_SEARCH_PATHS.map {|base_path| (base_path + "#{template}.html.erb").expand_path}.inspect
-      template_path = TEMPLATE_SEARCH_PATHS.map {|base_path| (base_path + "#{template}.html.erb").expand_path}.find {|p| p.exist? && p.file?}
-      raise ArgumentError, "Unknown template #{template.inspect}.  Not in #{TEMPLATE_SEARCH_PATHS.inspect}" if template_path.nil?
+      template_name = "#{template}.html.erb"
+      template_path = template_search_paths.map {|base_path| (base_path + template_name).expand_path}.find {|p| p.exist? && p.file?}
+      raise ArgumentError, "Unknown template #{template_name.inspect}.  Not in #{template_search_paths.inspect}", caller if template_path.nil?
       return template_path.read
     end
 
@@ -69,13 +142,13 @@ module DebugBar
 
     # Returns the contactinated set of rendered callbacks usnig the given binding.
     def render_callbacks(callbacks, eval_binding)
-      return callbacks.map {|callback| render_callback(callback, eval_binding)}.join("\n")
+      return @callbacks.map {|callback| render_callback(callback, eval_binding)}.join("\n")
     end
 
     # Renders the given callback in the given binding.
     def render_callback(callback, eval_binding)
       # Get the result of the callback
-      obj = callback.call(eval_binding)
+      obj = callback.respond_to?(:call) ? callback.call(eval_binding) : callback
 
       # Extract the title, content, and opts from the result
       title, content, opts = case obj
@@ -91,7 +164,7 @@ module DebugBar
       opts = {:hidden => default_hidden}.merge(opts||{})
 
       # Render the callback in a box
-      return Erubis::Eruby.new(read_template(:callback_box)).result(:title => title, :content => content, :opts => opts).html_safe
+      return Erubis::Eruby.new( read_template(:callback_box) ).result(:title => title, :content => content, :opts => opts).html_safe
     end
 
     # A helper method that--if the eval_binding defines a cookies hash, and

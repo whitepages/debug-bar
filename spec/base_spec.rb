@@ -4,18 +4,21 @@ describe DebugBar::Base do
 
   describe 'callbacks' do
 
-    it 'should be able to initialize with recipes' do
-      debug_bar = DebugBar::Base.new(:params, :session)
-      debug_bar.callbacks.length.should == 2
-    end
-
     before(:each) do
       @debug_bar = DebugBar::Base.new
     end
 
-    it 'should register blocks' do
-      @debug_bar.callbacks.should == []
+    it 'should register recipes in initializer after the block is called' do
+      debug_bar = DebugBar::Base.new(:params) do |bar|
+        bar.add_recipe_book(DebugBar::RecipeBook::Default)
+        bar.callbacks.length.should == 0
+      end
 
+      debug_bar.callbacks.length.should == 1
+    end
+
+
+    it 'should register blocks' do
       @debug_bar.add {|b| ["Test Block", "Test Content", {}]}
 
       @debug_bar.callbacks.length.should == 1
@@ -23,12 +26,15 @@ describe DebugBar::Base do
     end
 
     it 'should register recipes' do
-      @debug_bar.callbacks.should == []
-
+      @debug_bar.add_recipe_book(DebugBar::RecipeBook::Default)
       @debug_bar.add(:params)
 
       @debug_bar.callbacks.length.should == 1
       @debug_bar.callbacks.first.should be_kind_of(Proc)
+    end
+
+    it 'should error on nil' do
+      lambda {@debug_bar.add(nil)}.should raise_error(ArgumentError)
     end
 
   end
@@ -82,6 +88,7 @@ describe DebugBar::Base do
     end
 
     it 'should render recipes' do
+      @debug_bar.add_recipe_book(DebugBar::RecipeBook::Default)
       @debug_bar.add(:params)
       params = {:given_name => 'Amelia', :family_name => 'Pond'}
 
@@ -155,6 +162,22 @@ describe DebugBar::Base do
       extract_classes.call(html_hidden).should_not include('show')
       extract_classes.call(html_nohide).should include('show')
     end
+
+  end
+
+  describe 'recipe books' do
+
+    it 'should add recipe books by class'
+
+    it 'should add recipe books by instance'
+
+    it 'should return the list of known recipes'
+
+    it 'should return a recipe callback if one is found'
+
+    it 'should raise an Argument Error if a recipe is not found'
+
+    it 'should use the last found instance of a recipe when it is duplicated'
 
   end
 
