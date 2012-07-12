@@ -40,9 +40,10 @@ module DebugBar
     # one or more recipe symbols as arguments.
     def initialize(*recipes)
       @callbacks = []
-      @recipe_books = default_recipe_books()
+      @recipe_books = []
+      default_recipe_books.map {|book| add_recipe_book(book)}
       yield self if block_given?
-      (recipes|default_recipes()).each {|recipe| add(recipe)}
+      (recipes|default_recipes()).each {|recipe| add_recipe(recipe)}
     end
 
     # Returns a copy of the raw list of callbacks.
@@ -90,6 +91,7 @@ module DebugBar
       @callbacks << callback_proc
       return self
     end
+    alias_method :add_recipe, :add_callback
     alias_method :add, :add_callback
 
     # Renders the debug bar with the given binding.
@@ -118,6 +120,8 @@ module DebugBar
     end
 
     # Returns the template search paths for this instance.
+    #
+    # Paths should be Pathname instances
     #
     # Subclasses may override this to change the search path for the formatting
     # templates such as the layout and callback_box templates.

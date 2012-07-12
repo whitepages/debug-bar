@@ -249,4 +249,60 @@ describe DebugBar::Base do
 
   end
 
+  describe 'subclass overrides' do
+
+    class SubclassTestBook < DebugBar::RecipeBook::Base
+
+      def beta_recipe
+        Proc.new {|b| :test_book_beta_recipe}
+      end
+
+    end
+
+    class SubclassInstanceTestBook < DebugBar::RecipeBook::Base
+
+      def foo_recipe
+        Proc.new {|b| :instance_test_book_foo_recipe}
+      end
+
+    end
+
+    class SubclassTestBar < DebugBar::Base
+
+      private
+
+      def default_recipe_books
+        return [SubclassTestBook, SubclassInstanceTestBook.new]
+      end
+
+      def default_recipes
+        return [:beta]
+      end
+
+      def template_search_paths
+        return :standin_for_an_array_of_pathnames
+      end
+
+    end
+
+    before(:each) do
+      debugger
+      @debug_bar = SubclassTestBar.new
+    end
+
+    it 'should add recipe books from the default recipe books method' do
+      @debug_bar.recipe_books.length.should == 2
+      @debug_bar.recipe_books.each {|book| book.should be_kind_of(DebugBar::RecipeBook::Base)}
+    end
+
+    it 'should add recipes from the default recipe method' do
+      @debug_bar.recipes.sort.should == [:beta, :foo].sort
+    end
+
+    it 'should allow overriding of the template path' do
+      @debug_bar.send(:template_search_paths).should == :standin_for_an_array_of_pathnames
+    end
+
+  end
+
 end
