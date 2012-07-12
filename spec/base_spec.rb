@@ -162,7 +162,24 @@ describe DebugBar::Base do
       html.index('bar').should_not be_nil
     end
 
-    it 'should default :hidden option based on session'
+    it 'should default :hidden option to true if not explicitly given and session remembers it as open based on id' do
+      # Emulate saving of open callback box ids in cookies.
+      cookies = {:debug_bar => 'rory_williams,amelia_pond'}
+      # Put into binding.
+      b = binding
+
+      html_rory = DebugBar::Base.new.add {|b| ['foo', 'bar', :id => 'rory_williams']}.render(b)
+      html_rose = DebugBar::Base.new.add {|b| ['foo', 'bar', :id => 'rose_tyler']}.render(b)
+
+      # Extract the classes from the first div that has a dbar-content class in it.
+      extract_classes = lambda do |html|
+        m = /<div[^>]+class=['"]([^>'"]*dbar-content[^>'"]*)[^>]+>/.match(html)
+        return m.to_a[1].to_s.split(/\s+/)
+      end
+
+      html_rory.should include('show')
+      html_rose.should_not include('show')
+    end
 
     it 'should recognize :hidden options' do
       html_hidden = DebugBar::Base.new.add {|b| ['foo', 'bar', :hidden => true]}.render(binding)
@@ -286,7 +303,6 @@ describe DebugBar::Base do
     end
 
     before(:each) do
-      debugger
       @debug_bar = SubclassTestBar.new
     end
 

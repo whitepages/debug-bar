@@ -42,17 +42,6 @@ module DebugBar
     #   debug_bar.add(:params, :formatter => :pretty_inspect)
     class Base
 
-      # Retrieves the template search paths for this recipe instance as
-      # fully expanded Pathname instances.
-      def self.template_search_paths
-        return @template_search_paths ||= []
-      end
-
-      # Sets the template search paths for this recipe instance.
-      def self.template_search_paths=(paths)
-        @template_search_paths = paths.map {|path| Pathname.new(path.to_s).expand_path }
-      end
-
       # Returns a list of recipes known to this class.
       def recipes
         return self.methods.select {|m| m.to_s =~ /_recipe$/}.map {|m| m.to_s.gsub(/_recipe$/,'').to_sym}
@@ -75,6 +64,22 @@ module DebugBar
 
       private
 
+      # Retrieves the template search paths for this recipe instance as
+      # fully expanded Pathname instances.
+      #
+      # While subclasses <i>may</i> override this method, it is preferrable
+      # for them to use the setter (+template_search_paths=+) during instance
+      # initialization, as the setter sanitizes the input.
+      def template_search_paths
+        return @template_search_paths ||= []
+      end
+
+      # Sets the template search paths for this recipe instance, converting
+      # to pathname objects as necessary.
+      def template_search_paths=(paths)
+        @template_search_paths = paths.map {|path| Pathname.new(path.to_s).expand_path }
+      end
+
       # Renders the first matching template found in the search paths.  Passed
       # symbols/names are automatically suffixed with 'html.erb'.  The template
       # name may be a symbol or string.
@@ -89,14 +94,9 @@ module DebugBar
       # The template name may be either a symbol or string.
       def read_template(template)
         template_name = "#{template}.html.erb"
-        template_path = self.template_search_paths.map {|base_path| (base_path + template_name).expand_path}.find {|p| p.exist? && p.file?}
-        raise ArgumentError, "Unknown template #{template_name.inspect}.  Not in #{TEMPLATE_SEARCH_PATHS.inspect}", caller if template_path.nil?
+        template_path = template_search_paths.map {|base_path| (base_path + template_name).expand_path}.find {|p| p.exist? && p.file?}
+        raise ArgumentError, "Unknown template #{template_name.inspect}.  Not in #{template_search_paths.inspect}", caller if template_path.nil?
         return template_path.read
-      end
-
-      # Returns the classes template search paths.
-      def template_search_paths
-        return self.class.template_search_paths
       end
 
     end

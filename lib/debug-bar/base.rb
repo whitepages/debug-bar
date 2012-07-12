@@ -41,7 +41,7 @@ module DebugBar
     def initialize(*recipes)
       @callbacks = []
       @recipe_books = []
-      default_recipe_books.map {|book| add_recipe_book(book)}
+      default_recipe_books.each {|book| add_recipe_book(book)}
       yield self if block_given?
       (recipes|default_recipes()).each {|recipe| add_recipe(recipe)}
     end
