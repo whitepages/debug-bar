@@ -12,10 +12,12 @@ module DebugBar
 
     private
 
+    # Override superclass method to provide the necessary cookbook.
     def default_recipe_books
       return [RecipeBook::Default]
     end
 
+    # The recipes added to this debug bar by default.
     def default_reicpes
       return [:params, :session]
     end
