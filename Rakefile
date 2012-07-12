@@ -18,3 +18,10 @@ Bundler::GemHelper.install_tasks
 Gemtools::RakeTask.install_tasks
 
 task :default => :spec
+
+require 'rake/rdoctask'
+
+Rake::RDocTask.new do |rdoc|
+  rdoc.rdoc_dir = "rdoc"
+  rdoc.rdoc_files.add "lib/**/*.rb", "README.rdoc"
+end
