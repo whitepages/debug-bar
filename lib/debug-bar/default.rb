@@ -18,7 +18,7 @@ module DebugBar
     end
 
     # The recipes added to this debug bar by default.
-    def default_reicpes
+    def default_recipes
       return [:params, :session]
     end
 
