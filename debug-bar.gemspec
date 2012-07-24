@@ -3,7 +3,7 @@ $:.push File.expand_path('../lib', __FILE__)
 require 'debug-bar/version'
 
 Gem::Specification.new do |s|
-  s.name        = 'wp-debug-bar'
+  s.name        = 'debug-bar'
   s.version     = DebugBar::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = ['Jeff Reinecke', 'Keith Stone']
