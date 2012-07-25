@@ -158,7 +158,11 @@ module DebugBar
     # Renders the given callback in the given binding.
     def render_callback(callback, eval_binding)
       # Get the result of the callback
-      obj = callback.respond_to?(:call) ? callback.call(eval_binding) : callback
+      obj = begin
+              callback.respond_to?(:call) ? callback.call(eval_binding) : callback
+            rescue Exception => error
+              render_error_callback(error)
+            end
 
       # Extract the title, content, and opts from the result
       title, content, opts = case obj
@@ -175,6 +179,14 @@ module DebugBar
 
       # Render the callback in a box
       return Erubis::Eruby.new( read_template(:callback_box) ).result(:title => title, :content => content, :opts => opts).html_safe
+    end
+
+    def render_error_callback(error, opts={})
+      return [
+        opts.fetch(:title, '**ERROR'),
+        "#{error.class}: #{error.message}<br/>" + error.backtrace.join("<br/>"),
+        {}
+      ]
     end
 
     # A helper method that--if the eval_binding defines a cookies hash, and
