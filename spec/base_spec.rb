@@ -130,6 +130,13 @@ describe DebugBar::Base do
       html.index('debug-bar').should_not be_nil # Picked the presence of CSS class as a good inidcator of presence.
     end
 
+    it 'should render on crash in callback' do
+      @debug_bar.add {|b| raise RuntimeError, "Uh-oh, you didn't handle the exception!"}
+      html = ''
+      lambda {html = @debug_bar.render(binding)}.should_not raise_error
+      puts html.inspect
+    end
+
   end
 
   describe 'options' do

@@ -158,7 +158,11 @@ module DebugBar
     # Renders the given callback in the given binding.
     def render_callback(callback, eval_binding)
       # Get the result of the callback
-      obj = callback.respond_to?(:call) ? callback.call(eval_binding) : callback
+      obj = begin
+              callback.respond_to?(:call) ? callback.call(eval_binding) : callback
+            rescue Exception => e
+              ['**ERROR', "#{e.class}: #{e.message}<br/>" + e.backtrace.join("<br/>"), {}]
+            end
 
       # Extract the title, content, and opts from the result
       title, content, opts = case obj
