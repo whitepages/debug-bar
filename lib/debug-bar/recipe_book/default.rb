@@ -15,20 +15,18 @@ module DebugBar
       def params_recipe(opts={})
         return Proc.new do |b|
           params_s = b[:params].awesome_print_html
-          hidden = params_s.length > opts.fetch(:cutoff, 512)
-          puts [params_s.length, hidden, opts].inspect
-          ['Params', params_s, {:hidden => hidden, :id => 'params'}]
+          ['Params', params_s, {:id => 'params'}]
         end
       end
 
       # Displays the session in a pretty printed way.
       def session_recipe
-        return Proc.new {|b| ['Session', b[:session].awesome_print_html, {:hidden => false, :id => 'session'}]}
+        return Proc.new {|b| ['Session', b[:session].awesome_print_html, {:id => 'session'}]}
       end
 
       # Displays the cookies.
       def cookies_recipe
-        return Proc.new {|b| ['Cookies', b[:cookies].awesome_print_html, {:hidden => true, :id => 'cookies'}]}
+        return Proc.new {|b| ['Cookies', b[:cookies].awesome_print_html, {:id => 'cookies'}]}
       end
 
     end

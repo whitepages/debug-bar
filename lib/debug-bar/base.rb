@@ -180,7 +180,7 @@ module DebugBar
       opts ||= {}
 
       # reverse merge the opts
-      default_hidden = opts[:id].nil? ? true : !cookie_include?(opts[:id], eval_binding)
+      default_hidden = opts[:id].nil? ? false : !cookie_include?(opts[:id], eval_binding)
       opts = {:hidden => default_hidden}.merge(opts||{})
 
       # Render the callback in a box
@@ -201,7 +201,7 @@ module DebugBar
     #
     # TODO: This code should be refactored to support more use cases as they appear.
     def cookie_include?(id, eval_binding)
-      debug_bar = eval_binding.eval("defined?(cookies) &&cookies[:debug_bar]")
+      debug_bar = eval_binding.eval("defined?(cookies) && cookies[:debug_bar]")
       debug_bar.nil? ? false : debug_bar.split(',').include?(id)
     end
   end
