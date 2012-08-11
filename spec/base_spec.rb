@@ -134,7 +134,7 @@ describe DebugBar::Base do
       @debug_bar.add {|b| raise RuntimeError, "Uh-oh, you didn't handle the exception!"}
       html = ''
       lambda {html = @debug_bar.render(binding)}.should_not raise_error
-      puts html.inspect
+      html.index('ERROR').should_not be_nil
     end
 
   end

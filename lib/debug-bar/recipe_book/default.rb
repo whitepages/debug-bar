@@ -1,5 +1,6 @@
 require 'pp'
 require 'awesome_print'
+require 'cgi'
 
 module DebugBar
   module RecipeBook
@@ -15,7 +16,7 @@ module DebugBar
       # TODO: Do better HTML entity encoding in inspect.
       def params_recipe(opts={})
         return Proc.new do |b|
-          params_s = b[:params].pretty_inspect.gsub('<','&lt;')
+          params_s = b[:params].pretty_inspect.html_escape
           hidden = params_s.length > opts.fetch(:cutoff, 160)
           ['Params', params_s, :hidden => hidden]
         end
@@ -25,7 +26,7 @@ module DebugBar
       #
       # TODO: Do better HTML entity encoding in inspect.
       def session_recipe
-        return Proc.new {|b| ['Session', b[:session].pretty_inspect.gsub('<','&lt;'), :hidden => false]}
+        return Proc.new {|b| ['Session', b[:session].pretty_inspect.html_escape, :hidden => false]}
       end
 
     end
