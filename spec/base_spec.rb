@@ -88,7 +88,7 @@ describe DebugBar::Base do
     it 'should render recipes' do
       @debug_bar.add_recipe_book(DebugBar::RecipeBook::Default)
       @debug_bar.add(:params)
-      params = {:given_name => 'Amelia', :family_name => 'Pond'}
+      params = {:given_name => 'Amelia', :family_name => 'Pond'} 
 
       html = @debug_bar.render(binding)
 

@@ -15,7 +15,8 @@ module DebugBar
       def params_recipe(opts={})
         return Proc.new do |b|
           params_s = b[:params].awesome_print_html
-          hidden = params_s.length > opts.fetch(:cutoff, 160)
+          hidden = params_s.length > opts.fetch(:cutoff, 512)
+          puts [params_s.length, hidden, opts].inspect
           ['Params', params_s, :hidden => hidden]
         end
       end

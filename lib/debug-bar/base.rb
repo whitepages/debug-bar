@@ -39,11 +39,16 @@ module DebugBar
     # Initialize a new debug bar.  This may optionally take
     # one or more recipe symbols as arguments.
     def initialize(*recipes)
+      #Initialize registration variables.
       @callbacks = []
       @recipe_books = []
+      # Register defaults.
       default_recipe_books.each {|book| add_recipe_book(book)}
+      default_recipes.each {|recipe| add_recipe(recipe)}
+      # Give a chance for custom configuration, including addition of books.
       yield self if block_given?
-      (default_recipes()|recipes).each {|recipe| add_recipe(recipe)}
+      # Now we can add user listed recipes.
+      recipes.each {|recipe| add_recipe(recipe)}
     end
 
     # Returns a copy of the raw list of callbacks.
