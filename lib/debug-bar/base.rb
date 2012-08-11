@@ -43,7 +43,7 @@ module DebugBar
       @recipe_books = []
       default_recipe_books.each {|book| add_recipe_book(book)}
       yield self if block_given?
-      (recipes|default_recipes()).each {|recipe| add_recipe(recipe)}
+      (default_recipes()|recipes).each {|recipe| add_recipe(recipe)}
     end
 
     # Returns a copy of the raw list of callbacks.
@@ -184,7 +184,7 @@ module DebugBar
     def render_error_callback(error, opts={})
       return [
         opts.fetch(:title, '**ERROR'),
-        "#{error.class}: #{error.message}<br/>" + error.backtrace.join("<br/>"),
+        ("#{error.class}: #{error.message}<br/>" + error.backtrace.join("<br/>")).html_escape,
         {}
       ]
     end
