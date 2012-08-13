@@ -39,11 +39,16 @@ module DebugBar
     # Initialize a new debug bar.  This may optionally take
     # one or more recipe symbols as arguments.
     def initialize(*recipes)
+      #Initialize registration variables.
       @callbacks = []
       @recipe_books = []
+      # Register defaults.
       default_recipe_books.each {|book| add_recipe_book(book)}
+      default_recipes.each {|recipe| add_recipe(recipe)}
+      # Give a chance for custom configuration, including addition of books.
       yield self if block_given?
-      (recipes|default_recipes()).each {|recipe| add_recipe(recipe)}
+      # Now we can add user listed recipes.
+      recipes.each {|recipe| add_recipe(recipe)}
     end
 
     # Returns a copy of the raw list of callbacks.
@@ -60,6 +65,7 @@ module DebugBar
       @recipe_books << (book.kind_of?(Class) ? book.new : book)
       return self
     end
+    alias_method :add_book, :add_recipe_book
 
     # Returns the list of recipes recognized by this debug bar.
     def recipes
@@ -67,10 +73,10 @@ module DebugBar
     end
 
     # Returns the most recently added occurance of the given recipe.
-    def recipe_callback(recipe, *args)
+    def recipe_callback(recipe, *args, &block)
       book = @recipe_books.reverse.find {|book| book.include?(recipe)}
       raise ArgumentError, "Could not find recipe #{recipe.inspect}", caller if book.nil?
-      return book.recipe(recipe, *args)
+      return book.recipe(recipe, *args, &block)
     end
 
     # Adds a callback.
@@ -82,11 +88,11 @@ module DebugBar
     #
     # Advanced users can call a recipe by name, and provide additional arguments
     # to configure the recipe further.  These arguments are defined by the
-    # recipe factory method, but usually are via an options hash.
+    # recipe factory method, but usually are via an options hash and/or a block.
     #
     # Returns self to support functional programming styles.
     def add_callback(recipe=nil, *args, &callback)
-      callback_proc = (callback || recipe_callback(recipe, *args))
+      callback_proc = recipe.nil? ? callback : recipe_callback(recipe, *args, &callback)
       raise ArgumentError, "Expected callback to respond to `call': #{callback_proc.inspect}", caller unless callback_proc.respond_to?(:call)
       @callbacks << callback_proc
       return self
@@ -174,7 +180,7 @@ module DebugBar
       opts ||= {}
 
       # reverse merge the opts
-      default_hidden = opts[:id].nil? ? true : !cookie_include?(opts[:id], eval_binding)
+      default_hidden = opts[:id].nil? ? false : !cookie_include?(opts[:id], eval_binding)
       opts = {:hidden => default_hidden}.merge(opts||{})
 
       # Render the callback in a box
@@ -184,7 +190,7 @@ module DebugBar
     def render_error_callback(error, opts={})
       return [
         opts.fetch(:title, '**ERROR'),
-        "#{error.class}: #{error.message}<br/>" + error.backtrace.join("<br/>"),
+        Erubis::Eruby.new(read_template(:error)).result(:error => error).html_safe,
         {}
       ]
     end
@@ -195,7 +201,7 @@ module DebugBar
     #
     # TODO: This code should be refactored to support more use cases as they appear.
     def cookie_include?(id, eval_binding)
-      debug_bar = eval_binding.eval("cookies[:debug_bar]")
+      debug_bar = eval_binding.eval("defined?(cookies) && cookies[:debug_bar]")
       debug_bar.nil? ? false : debug_bar.split(',').include?(id)
     end
   end

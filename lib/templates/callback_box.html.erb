@@ -6,7 +6,7 @@
 <% end %>
     [x] <span class="title" style="font-weight:bold; color: #000000;"><%= title %></span>
   </a>
-  <div class="dbar-content <%= 'show' unless opts[:hidden] %>">
+  <div class="dbar-content <%= 'show' unless opts[:hidden] %>" <%= 'style="display:none"' if opts[:hidden] %> >
     <%= content %>
   </div>
 </div>

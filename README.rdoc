@@ -99,6 +99,24 @@ Callbacks may provide the following options:
 [:hidden] Controls default state of disclosure arrow for the callback's content.
           Note that if an :id is provided, the state can be remembered between requests.
 
+=== UI Tools
+
+Note that debug-bar callbacks can use the 'toggle-switch' and 'toggle-content'
+classes to drive toggleable hide/show behavior inside of the debug-bar.  To
+do so, add the 'toggle-switch' class to the link that causes toggle, and the
+'toggle-content' class to the <i>sibling</i> element that will toggle.
+
+For example:
+
+  <div>
+    <a href="" class="toggle-switch">Details</a>
+    <div class="toggle-content" style="display:none">
+      Lot's of content here.
+    </div>
+  </div>
+
+This would present a "Details" link that would reveal the content div.
+
 == Custom Recipes
 
 While it is convenient to define one-off callbacks directly via add, it is

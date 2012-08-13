@@ -1,4 +1,3 @@
-source 'http://uproxy0.util.pages/rubygems-whitepages/'
 source 'https://rubygems.org'
 
 gemspec

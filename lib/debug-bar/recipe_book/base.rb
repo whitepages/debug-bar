@@ -57,12 +57,10 @@ module DebugBar
       # All recipes are expected to accept no arguments, but may optionally
       # take more.  Optional arguments given to this method are passed through
       # to the recipe method.
-      def recipe(recipe, *args)
-        return self.send("#{recipe}_recipe", *args)
+      def recipe(recipe, *args, &block)
+        return self.send("#{recipe}_recipe", *args, &block)
       end
       alias_method :[], :recipe
-
-      private
 
       # Retrieves the template search paths for this recipe instance as
       # fully expanded Pathname instances.
@@ -79,6 +77,8 @@ module DebugBar
       def template_search_paths=(paths)
         @template_search_paths = paths.map {|path| Pathname.new(path.to_s).expand_path }
       end
+
+      private
 
       # Renders the first matching template found in the search paths.  Passed
       # symbols/names are automatically suffixed with 'html.erb'.  The template

@@ -1,3 +1,24 @@
+<style>
+  .dbar-content pre {
+    background: #a9a9a9;
+    margin: 0;
+    padding: 0;
+    font-size: 10px;
+    font-family: "Lucida Console", Monaco, monospace;
+  }
+
+  .dbar-content pre pre {
+    background: #a9a9a9;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 10px;
+    font-family: "Lucida Console", Monaco, monospace;
+    display: inline;
+  }
+
+</style>
+
 <div id="debug-bar" style="text-align:left; border:1px solid yellow; background:#ffffaa; width:24px; position:fixed; top:0; left:0; z-index:999">
   <a href="" id="debug-toggle">[x]</a>
   <div id="debug-data" style="font-size:9pt; display:none; overflow:auto;">
@@ -73,10 +94,19 @@
         toggleDebugBar();
     });
     
+    // Debug-bar section specific toggle (may differ from generic toggle.
+    // This is meant to be consumable by callback makers.
     jQuery('.dbar-toggle').bind('click', function(){
       var toggle = jQuery(this); 
       var content = toggle.closest('.dbar-togglable').find('.dbar-content');
       content.first().toggle(); 
+      return false;
+    });
+
+    // Generic togglable inside of debug bar callback content area.
+    jQuery('.dbar-content').find('.toggle-switch').click(function(){
+      var toggle_content = jQuery(this).siblings('.toggle-content');
+      toggle_content.toggle();
       return false;
     });
     

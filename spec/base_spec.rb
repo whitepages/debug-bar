@@ -1,5 +1,25 @@
 require 'spec_helper'
 
+
+class TestDefaultRecipeBook < DebugBar::RecipeBook::Base
+
+      def params_recipe(opts={})
+        return Proc.new do |b|
+          params_s = b[:params].awesome_print_html
+          hidden = params_s.length > opts.fetch(:cutoff, 512)
+          puts [params_s.length, hidden, opts].inspect
+          ['Params', params_s, {:hidden => hidden, :id => 'params'}]
+        end
+      end
+
+      def block_test_recipe(arg=nil)
+        return Proc.new do |b|
+          ['Block Test', "|arg|#{arg}|arg| |block|#{yield(b) if block_given?}|block|", {}]
+        end
+      end
+
+end
+
 describe DebugBar::Base do
 
   describe 'callbacks' do
@@ -10,7 +30,7 @@ describe DebugBar::Base do
 
     it 'should register recipes in initializer after the block is called' do
       debug_bar = DebugBar::Base.new(:params) do |bar|
-        bar.add_recipe_book(DebugBar::RecipeBook::Default)
+        bar.add_recipe_book(TestDefaultRecipeBook)
         bar.callbacks.length.should == 0
       end
 
@@ -26,7 +46,7 @@ describe DebugBar::Base do
     end
 
     it 'should register recipes' do
-      @debug_bar.add_recipe_book(DebugBar::RecipeBook::Default)
+      @debug_bar.add_recipe_book(TestDefaultRecipeBook)
       @debug_bar.add(:params)
 
       @debug_bar.callbacks.length.should == 1
@@ -86,9 +106,9 @@ describe DebugBar::Base do
     end
 
     it 'should render recipes' do
-      @debug_bar.add_recipe_book(DebugBar::RecipeBook::Default)
+      @debug_bar.add_recipe_book(TestDefaultRecipeBook)
       @debug_bar.add(:params)
-      params = {:given_name => 'Amelia', :family_name => 'Pond'}
+      params = {:given_name => 'Amelia', :family_name => 'Pond'} 
 
       html = @debug_bar.render(binding)
 
@@ -101,7 +121,7 @@ describe DebugBar::Base do
     end
 
     it 'should render recipes with args' do
-      @debug_bar.add_recipe_book(DebugBar::RecipeBook::Default)
+      @debug_bar.add_recipe_book(TestDefaultRecipeBook)
       @debug_bar.add(:params, :cutoff => 12)
 
       params = {:given_name => 'Amelia', :family_name => 'Pond'}
@@ -114,6 +134,18 @@ describe DebugBar::Base do
       html.index('Amelia').should_not be_nil
       html.index(':given_name').should_not be_nil
       html.index('dbar-content show').should be_nil # See if params was collapsed due to cutoff.
+    end
+
+    it 'should render recipes with block args' do
+      @debug_bar.add_recipe_book(TestDefaultRecipeBook)
+      @debug_bar.add(:block_test) {|b| b.class.name}
+
+      html = @debug_bar.render(binding)
+
+      html.should be_kind_of(String)
+      html.should_not be_empty
+
+      html.index('|block|Binding|block|').should_not be_nil
     end
 
     it 'should render the callback_box' do
@@ -134,7 +166,7 @@ describe DebugBar::Base do
       @debug_bar.add {|b| raise RuntimeError, "Uh-oh, you didn't handle the exception!"}
       html = ''
       lambda {html = @debug_bar.render(binding)}.should_not raise_error
-      puts html.inspect
+      html.index('ERROR').should_not be_nil
     end
 
   end

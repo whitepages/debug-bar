@@ -1,0 +1,6 @@
+<div class="error">
+  <pre>
+    <%= error.class.to_s.html_escape %>:<%= error.message.to_s.html_escape %>
+  </pre>
+  <%= error.backtrace.awesome_print_html %>
+</div>

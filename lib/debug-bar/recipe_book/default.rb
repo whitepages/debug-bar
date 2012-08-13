@@ -1,5 +1,6 @@
 require 'pp'
 require 'awesome_print'
+require 'cgi'
 
 module DebugBar
   module RecipeBook
@@ -11,21 +12,21 @@ module DebugBar
       # If the :cutoff option is given, it auto-hides when the params are
       # more characters in length than the cutoff, otherwise it defaults to
       # a sane length.
-      #
-      # TODO: Do better HTML entity encoding in inspect.
       def params_recipe(opts={})
         return Proc.new do |b|
-          params_s = b[:params].pretty_inspect.gsub('<','&lt;')
-          hidden = params_s.length > opts.fetch(:cutoff, 160)
-          ['Params', params_s, :hidden => hidden]
+          params_s = b[:params].awesome_print_html
+          ['Params', params_s, {:id => 'params'}]
         end
       end
 
       # Displays the session in a pretty printed way.
-      #
-      # TODO: Do better HTML entity encoding in inspect.
       def session_recipe
-        return Proc.new {|b| ['Session', b[:session].pretty_inspect.gsub('<','&lt;'), :hidden => false]}
+        return Proc.new {|b| ['Session', b[:session].awesome_print_html, {:id => 'session'}]}
+      end
+
+      # Displays the cookies.
+      def cookies_recipe
+        return Proc.new {|b| ['Cookies', b[:cookies].awesome_print_html, {:id => 'cookies'}]}
       end
 
     end
