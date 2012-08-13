@@ -94,10 +94,19 @@
         toggleDebugBar();
     });
     
+    // Debug-bar section specific toggle (may differ from generic toggle.
+    // This is meant to be consumable by callback makers.
     jQuery('.dbar-toggle').bind('click', function(){
       var toggle = jQuery(this); 
       var content = toggle.closest('.dbar-togglable').find('.dbar-content');
       content.first().toggle(); 
+      return false;
+    });
+
+    // Generic togglable inside of debug bar callback content area.
+    jQuery('.dbar-content').find('.toggle-switch').click(function(){
+      var toggle_content = jQuery(this).siblings('.toggle-content');
+      toggle_content.toggle();
       return false;
     });
     
