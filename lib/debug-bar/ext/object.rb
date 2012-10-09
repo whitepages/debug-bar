@@ -9,7 +9,7 @@ module DebugBar
       end
 
       def awesome_print_html
-        return self.awesome_print(:html => true)
+        return self.awesome_print(:html => true, :indent => -3)
       end
 
     end
