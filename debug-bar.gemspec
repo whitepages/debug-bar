@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.authors     = ['Jeff Reinecke', 'Keith Stone']
   s.email       = ['jreinecke@whitepages.com', 'kstone@whitepages.com']
-  s.homepage    = ''
+  s.homepage    = 'https://github.com/whitepages/debug-bar'
   s.summary     = 'Debug Bar'
   s.description = 'Base generic debug bar implementation.'
   s.licenses    = ['BSD']
