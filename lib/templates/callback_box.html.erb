@@ -4,7 +4,7 @@
 <% else %>
   <a href="" class='dbar-toggle'>
 <% end %>
-    [x] <span class="title" style="font-weight:bold; color: #000000;"><%= title %></span>
+    [x] <span class="title" style="font-weight:bold; color: #000000;font-size: 16px;"><%= title %></span>
   </a>
   <div class="dbar-content <%= 'show' unless opts[:hidden] %>" <%= 'style="display:none"' if opts[:hidden] %> >
     <%= content %>
