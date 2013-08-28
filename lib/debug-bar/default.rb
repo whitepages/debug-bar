@@ -19,7 +19,7 @@ module DebugBar
 
     # The recipes added to this debug bar by default.
     def default_recipes
-      return [:params, :session]
+      return [:params, :session, :exception]
     end
 
   end
