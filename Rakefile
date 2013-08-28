@@ -19,7 +19,7 @@ Gemtools::RakeTask.install_tasks
 
 task :default => :spec
 
-require 'rake/rdoctask'
+require 'rdoc/task'
 
 Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_dir = "rdoc"

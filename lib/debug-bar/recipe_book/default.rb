@@ -29,6 +29,12 @@ module DebugBar
         return Proc.new {|b| ['Cookies', b[:cookies].awesome_print_html, {:id => 'cookies'}]}
       end
 
+      def exception_recipe
+        return Proc.new do |b|
+          exception = b.eval("request.env[\"action_dispatch.exception\"]")
+          exception ? ['Exception', exception.awesome_print_html, {:id => 'exceptions'}] : nil
+        end
+      end
     end
   end
 end
