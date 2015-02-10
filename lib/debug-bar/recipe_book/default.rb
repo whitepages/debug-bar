@@ -1,6 +1,7 @@
 require 'pp'
 require 'awesome_print'
 require 'cgi'
+require 'socket'
 
 module DebugBar
   module RecipeBook
@@ -33,6 +34,13 @@ module DebugBar
         return Proc.new do |b|
           exception = b.eval("request.env[\"action_dispatch.exception\"]")
           exception ? ['Exception', exception.awesome_print_html, {:id => 'exceptions'}] : nil
+        end
+      end
+
+      def host_recipe
+        return Proc.new do |b|
+          host = Socket.gethostname
+          ['Host', host.awesome_print_html, { id: 'host' }]
         end
       end
     end
