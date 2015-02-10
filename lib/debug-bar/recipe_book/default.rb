@@ -1,6 +1,7 @@
 require 'pp'
 require 'awesome_print'
 require 'cgi'
+require 'socket'
 
 module DebugBar
   module RecipeBook
@@ -41,6 +42,13 @@ module DebugBar
           else
             nil
           end
+        end
+      end
+
+      def host_recipe
+        return Proc.new do |b|
+          host = Socket.gethostname
+          ['Host', host.awesome_print_html, { id: 'host' }]
         end
       end
     end

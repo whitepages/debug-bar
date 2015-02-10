@@ -4,3 +4,5 @@ Gemfile.lock
 *.swo
 pkg/
 rdoc/
+.bundle/
+.bin/

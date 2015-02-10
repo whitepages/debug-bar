@@ -37,6 +37,8 @@ describe DebugBar::RecipeBook::Base do
     @book = RecipeTestBook.new
   end
 
+  subject { @book }
+
   describe 'recipe introspection' do
 
     it 'should give the list of all known recipes as symbols' do
@@ -44,13 +46,13 @@ describe DebugBar::RecipeBook::Base do
     end
 
     it 'should allow checking for knowledge of a recipe by symbol' do
-      @book.include?(:time).should be_true
-      @book.include?(:zeta).should be_false
+      expect(subject.include?(:time)).to be_truthy
+      expect(subject.include?(:zeta)).to be_falsey
     end
 
     it 'should allow checking for knowledge of a recipe by string' do
-      @book.include?('time').should be_true
-      @book.include?('zeta').should be_false
+      expect(subject.include?('time')).to be_truthy
+      expect(subject.include?('zeta')).to be_falsey
     end
 
   end
