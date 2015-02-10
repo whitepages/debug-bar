@@ -33,7 +33,15 @@ module DebugBar
       def exception_recipe
         return Proc.new do |b|
           exception = b.eval("request.env[\"action_dispatch.exception\"]")
-          exception ? ['Exception', exception.awesome_print_html, {:id => 'exceptions'}] : nil
+          if exception
+            [
+              'Exception',
+              exception.awesome_print_html + exception.backtrace.awesome_print_html,
+              {:id => 'exceptions'}
+            ]
+          else
+            nil
+          end
         end
       end
 
